@@ -1,0 +1,11 @@
+{
+    "request_types":[
+        "get"
+    ],
+    "get":[
+        "/",
+        "/404",
+        "/index.js",
+        "/style.css"
+    ]
+}
