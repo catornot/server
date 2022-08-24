@@ -39,8 +39,15 @@ impl Response {
         
         let mut path_str = path.to_string();
         path_str.remove(0);
+
+        let content = if path_str.ends_with( ".png" ) {
+            fs::read_to_string( path_str )
+        }
+        else {
+            fs::read_to_string( path_str )
+        };
     
-        self.content = match  fs::read_to_string( path_str ) {
+        self.content = match content {
             Err( err ) => { 
                 println!( "{}", err );
                 println!( "path : {}", path );

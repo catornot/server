@@ -6,6 +6,7 @@
         "/",
         "/404",
         "/index.js",
-        "/style.css"
+        "/style.css",
+        "/img/background.png"
     ]
 }
