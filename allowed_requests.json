@@ -7,6 +7,8 @@
         "/404",
         "/index.js",
         "/index.css",
-        "/img/background.png"
+        "/img/background.png",
+        "/img/icon.png",
+        "/img/favicon.ico"
     ]
 }
