@@ -11,7 +11,7 @@ struct AllowedResponse {
 }
 struct Response {
     response:String,
-    content:String
+    content:Vec<u8>
 }
 
 impl Response {
@@ -25,7 +25,7 @@ impl Response {
         println!( "page {}", request );
     
         if request == "/" {
-            self.content = fs::read_to_string( "index.html" ).unwrap()
+            self.content = fs::read( "index.html" ).unwrap()
         }
         else {
             let mut path = request.to_string();
@@ -39,15 +39,8 @@ impl Response {
         
         let mut path_str = path.to_string();
         path_str.remove(0);
-
-        let content = if path_str.ends_with( ".png" ) {
-            fs::read_to_string( path_str )
-        }
-        else {
-            fs::read_to_string( path_str )
-        };
     
-        self.content = match content {
+        self.content = match fs::read( path_str ) {
             Err( err ) => { 
                 println!( "{}", err );
                 println!( "path : {}", path );
@@ -82,16 +75,18 @@ fn handle_connection( mut stream:TcpStream ) {
 
     stream.read( &mut buffer ).expect( "couldn't read stream" );
 
-    let response_ = get_response_from_request( buffer );
+    let mut response_ = get_response_from_request( buffer );
 
-    let response = format!(
-        "{}\r\nContent-Length: {}\r\n\r\n{}",
+    let response_str = format!(
+        "{}\r\nContent-Length: {}\r\n\r\n",
         response_.response,
-        response_.content.len(),
-        response_.content
+        response_.content.len()
     );
+    
+    let mut response = Vec::from( response_str.as_bytes() );
+    response.append( &mut response_.content );
 
-    stream.write( response.as_bytes() ).unwrap();
+    stream.write( &response[..] ).unwrap();
     stream.flush().unwrap();
 }
 
@@ -166,6 +161,6 @@ fn get_response_from_request( buffer:[u8; 1024] ) -> Response {
 fn not_found_reponse() -> Response {
     return Response {
         response: String::from( "HTTP/1.1 404 NOT FOUND" ), 
-        content: fs::read_to_string( "404.html" ).unwrap()
+        content: fs::read( "404.html" ).unwrap()
     }
 }
