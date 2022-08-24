@@ -25,7 +25,7 @@ impl Response {
         println!( "page {}", request );
     
         if request == "/" {
-            self.content = fs::read( "index.html" ).unwrap()
+            self.content = fs::read( "web_src/index.html" ).unwrap()
         }
         else {
             let mut path = request.to_string();
@@ -38,7 +38,7 @@ impl Response {
     fn set_content_by_path( &mut self, path:&str ) {
         
         let mut path_str = path.to_string();
-        path_str.remove(0);
+        path_str.insert_str(0, "web_src/" );
     
         self.content = match fs::read( path_str ) {
             Err( err ) => { 
@@ -64,7 +64,7 @@ fn main() {
     for stream in listener.incoming() {
         let stream = stream.expect( "couldn't connect" );
 
-        println!( "connection established" );
+        // println!( "connection established" );
 
         handle_connection( stream )
     }
@@ -102,13 +102,6 @@ fn get_response_from_request( buffer:[u8; 1024] ) -> Response {
     println!( "{}", request );
 
     let json = fs::read_to_string( "allowed_requests.json" ).unwrap();
-    // let allowed:AllowedResponse = match serde_json::from_str( &json ) {
-    //     Err( e ) => return Response {
-    //         response: String::from( "HTTP/1.1 404 NOT OK" ), 
-    //         content: fs::read_to_string( "404.html" ).unwrap()
-    //     },
-    //     Ok( allowed ) => allowed.unwrap()
-    // };
 
     let res = serde_json::from_str( &json[..] );
 
@@ -138,7 +131,7 @@ fn get_response_from_request( buffer:[u8; 1024] ) -> Response {
         for a in request.split( " " ) {
             for x in 0..allowed.len() {
                 if allowed[x] == a {
-                    println!( "{}", a );
+                    println!( "requested: {}", a );
                     
                     response.response = OK.to_string();
 
@@ -161,6 +154,6 @@ fn get_response_from_request( buffer:[u8; 1024] ) -> Response {
 fn not_found_reponse() -> Response {
     return Response {
         response: String::from( "HTTP/1.1 404 NOT FOUND" ), 
-        content: fs::read( "404.html" ).unwrap()
+        content: fs::read( "web_src/404.html" ).unwrap()
     }
 }
