@@ -4,6 +4,7 @@ use std::fs;
 use std::io::prelude::*;
 use std::net::TcpListener;
 use std::net::TcpStream;
+use server::ThreadPool;
 
 #[derive(Serialize, Deserialize)]
 struct AllowedResponse {
@@ -58,7 +59,7 @@ impl Response {
 const OK: &str = "HTTP/1.1 200 OK";
 
 fn main() {
-    let listener: TcpListener = match TcpListener::bind("127.0.0.1:7878") {
+    let listener: TcpListener = match TcpListener::bind("localhost:7878") { // "127.0.0.1:7878"
         Err(err) => {
             println!("port isn't available {}", err);
             return;
@@ -66,12 +67,14 @@ fn main() {
         Ok(listener) => listener,
     };
 
+    let pool = ThreadPool::new( 20 );
+
     for stream in listener.incoming() {
         let stream = stream.expect("couldn't connect");
 
-        // println!( "connection established" );
-
-        handle_connection(stream)
+        pool.execute( || {
+            handle_connection(stream);
+        });
     }
 }
 
