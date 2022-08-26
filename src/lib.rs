@@ -49,7 +49,7 @@ impl Worker {
             .recv()
             .unwrap();
             
-            println!( "Worker {} got a job; exectuing.", id );
+            // println!( "Worker {} got a job; exectuing.", id );
 
             job();
         } );

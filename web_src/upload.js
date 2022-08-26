@@ -38,14 +38,25 @@ window.addEventListener( "load", () => {
                 for( let chunkId = 0; chunkId < chunkCount + 1; chunkId++ ) {
 
                     const chunk = picFile.result.slice( chunkId * CHUNK_SIZE, chunkId * CHUNK_SIZE + CHUNK_SIZE );
-                
-                    await fetch ( "http://localhost:7878/upload", {
+                    
+                    console.log( chunk.byteLength );
+
+                    let length = chunk.length
+
+                    if ( typeof( chunk ) != String ) {
+                        length = chunk.byteLength
+                    }
+
+                    const response = await fetch ( "http://localhost:7878/upload", {
                         "method": "POST-IMAGE",
                         "headers": {
-                            "content-length": chunk.length,
-                            "file-name": id
-                        }
+                            "content-length": length,
+                            "file-name": id,
+                            "body": chunk
+                        },
                     } )
+
+                    // console.log( response.status )
 
                     label.innerHTML = `${ parseInt( chunkId * CHUNK_SIZE / parseInt( picFile.result.byteLength ) * 100 ) }%`;
                 }
