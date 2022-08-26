@@ -147,6 +147,26 @@ fn get_response_from_request(buffer: [u8; 1024 * 2]) -> Response {
             }
         }
     }
+    else if request_type == "POST-IMAGE" {
+        // println!("Request: {:#?}", http_request);
+
+        for arg in http_request {
+            // println!( "{}", arg );
+
+            if arg.starts_with( "content-length" ) {
+                println!( "found content-length" )
+            }
+            else if arg.starts_with( "file-name" ) {
+                let arg = arg.split_whitespace();
+                for a in arg {
+                    println!( "found file-name: {}", a );
+                }
+            }
+        }
+
+        response.response = OK.to_string();
+        response.content = Vec::new();
+    }
 
     // println!("Request: {:#?}", http_request);
 
