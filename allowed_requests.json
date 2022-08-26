@@ -5,10 +5,14 @@
     "get":[
         "/",
         "/404",
+        "/upload",
         "/index.js",
+        "/upload.js",
         "/index.css",
+        "/upload.css",
         "/img/background.png",
         "/img/icon.png",
+        "/favicon.ico",
         "/img/favicon.ico"
     ]
 }

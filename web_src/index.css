@@ -6,6 +6,8 @@ body {
     text-align: center;
     overflow-x: hidden;
     /* background-image: url("img/background.png"); */
+    background-image: linear-gradient(black, darkblue);
+    size: 100%;
 }
 
 section {
