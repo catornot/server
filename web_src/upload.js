@@ -20,13 +20,14 @@ window.addEventListener( "load", () => {
             if ( !files[i].type.match( "image" ) ) { continue }
 
             const picReader = new FileReader();
+            const file = files[i];
 
             picReader.onload = async event => {
                 const picFile = event.target;
                 const section = document.createElement( "section" );
                 section.className = "imgsection";
-                const id = `${ Math.random() * 1000 * Math.random() }`
-                section.innerHTML = `<label class="piclabel" id="${ id }"> ${ 0 }% </label>`;
+                const id = `${ file.name }.${ Math.random() * 1000 * Math.random() }`
+                section.innerHTML = `<label class="piclabel" id="${ id }">${ file.name } ${ 0 }%</label>`;
                 display.appendChild( section );
 
                 const label = document.getElementById( id );
@@ -52,13 +53,13 @@ window.addEventListener( "load", () => {
                         },
                     } )
 
-                    label.innerHTML = `${ parseInt( chunkId * CHUNK_SIZE / parseInt( picFile.result.byteLength ) * 100 ) }%`;
+                    label.innerHTML = `${ file.name } ${ parseInt( chunkId * CHUNK_SIZE / parseInt( picFile.result.byteLength ) * 100 ) }%`;
                 }
 
-                label.innerHTML = `${ 100 }%`;
+                label.innerHTML = `${ file.name } ${ 100 }%`;
             };
             
-            picReader.readAsArrayBuffer( files[i] );
+            picReader.readAsArrayBuffer( file );
         }
     } )
 } )
