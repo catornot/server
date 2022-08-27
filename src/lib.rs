@@ -1,5 +1,7 @@
 use std::{thread, sync::{mpsc, Mutex, Arc} };
 
+#[allow(dead_code)]
+#[allow(unused_variables)]
 pub struct ThreadPool {
     workers: Vec<Worker>,
     sender: mpsc::Sender<Job>
@@ -33,6 +35,8 @@ impl ThreadPool {
     }
 }
 
+#[allow(dead_code)]
+#[allow(unused_variables)]
 struct Worker {
     id: usize,
     thread: thread::JoinHandle<()>
@@ -41,7 +45,7 @@ struct Worker {
 impl Worker {
     pub fn new( id:usize, receiver:Arc<Mutex<mpsc::Receiver<Job>>> ) -> Worker {
 
-        let mut thread = thread::spawn( move || loop { 
+        let thread = thread::spawn( move || loop { 
 
             let job = receiver
             .lock()

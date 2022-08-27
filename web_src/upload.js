@@ -33,7 +33,7 @@ window.addEventListener( "load", () => {
 
                 const label = document.getElementById( id );
                 
-                const CHUNK_SIZE = 2000;
+                const CHUNK_SIZE = 1500;
                 const chunkCount = picFile.result.byteLength / CHUNK_SIZE;
                 for( let chunkId = 0; chunkId < chunkCount + 1; chunkId++ ) {
 
@@ -41,18 +41,20 @@ window.addEventListener( "load", () => {
                     
                     console.log( chunk.byteLength );
 
-                    let length = chunk.length
+                    let base64chunk = btoa(String.fromCharCode.apply(null, new Uint8Array( chunk )));
 
-                    if ( typeof( chunk ) != String ) {
-                        length = chunk.byteLength
-                    }
+                    let length = base64chunk.length
+
+                    // if ( typeof( chunk ) != String ) {
+                    //     length = chunk.byteLength
+                    // }
 
                     const response = await fetch ( "http://localhost:7878/upload", {
                         "method": "POST-IMAGE",
                         "headers": {
-                            "content-length": length,
+                            "length": length,
                             "file-name": id,
-                            "body": chunk
+                            "body": base64chunk,
                         },
                     } )
 

@@ -1,10 +1,13 @@
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use std::fs;
+use std::fs::File;
+use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::net::TcpListener;
 use std::net::TcpStream;
 use server::ThreadPool;
+use base64::decode;
 
 #[derive(Serialize, Deserialize)]
 struct AllowedResponse {
@@ -79,7 +82,7 @@ fn main() {
 }
 
 fn handle_connection(mut stream: TcpStream) {
-    let mut buffer = [0; 1024 * 2];
+    let mut buffer = [0; 1024 * 4];
 
     stream.read(&mut buffer).expect("couldn't read stream");
 
@@ -98,7 +101,7 @@ fn handle_connection(mut stream: TcpStream) {
     stream.flush().unwrap();
 }
 
-fn get_response_from_request(buffer: [u8; 1024 * 2]) -> Response {
+fn get_response_from_request(buffer: [u8; 1024 * 4]) -> Response {
     let http_request: Vec<_> = buffer
         .lines()
         .map(|result| result.unwrap())
@@ -153,20 +156,20 @@ fn get_response_from_request(buffer: [u8; 1024 * 2]) -> Response {
     else if request_type == "POST-IMAGE" {
         // println!("Request: {:#?}", http_request);
 
+        response.response = OK.to_string();
+        response.content = Vec::new();
+
         let mut contentlen = 0;
         let mut name = "ohno".to_string();
+        
 
-        for arg in http_request {
-            // println!( "{}", arg );
-
-            if arg.starts_with( "Content-Length" ) {
-
-                contentlen = arg[16..].parse::<i32>().unwrap();
+        for arg in &http_request {
+            if arg.starts_with( "length" ) {
+                contentlen = arg[8..].parse::<usize>().unwrap();
             }
-            else if arg.starts_with( "file-name" ) {
+            if arg.starts_with( "file-name" ) {
                 let arg = arg.split_whitespace();
                 for a in arg {
-                    
                     if a.starts_with( "file-name" ) { continue };
 
                     name = a.to_string();
@@ -174,11 +177,45 @@ fn get_response_from_request(buffer: [u8; 1024 * 2]) -> Response {
             }
         }
 
+        if contentlen == 0 { return response; } // yes
+
+        for arg in http_request {
+            if arg.starts_with( "body" ) {
+
+                let arg = arg.split_whitespace();
+
+                let name = format!( "imgs/{}.png",name );
+
+            
+                for a in arg {
+                    if a.starts_with( "body" ) { continue };
+
+                    // println!( "{:?}", &a );
+
+                    let a_buffer = decode( a ).unwrap();
+
+                    // println!( "{:?}", a_buffer );
+
+                    let mut file: File = match OpenOptions::new()
+                        .write(true)
+                        .append(true)
+                        .open(&name) {
+                            Ok( file ) => file,
+                            Err( _ ) => File::create( &name ).unwrap()
+
+                    };
+
+                    if let Err(e) = file.write_all( &a_buffer[..] ) {
+                        eprintln!("Couldn't write to file: {}", e);
+                    }
+                };
+
+                break;
+            }
+        }
+
         println!( "content-length: {}", contentlen );
         println!( "file-name: {}", name );
-
-        response.response = OK.to_string();
-        response.content = Vec::new();
     }
 
     // println!("Request: {:#?}", http_request);
