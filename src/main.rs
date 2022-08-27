@@ -169,56 +169,52 @@ fn get_response_from_request(buffer: [u8; 1024 * 4]) -> Response {
             }
             if arg.starts_with( "file-name" ) {
                 let arg = arg.split_whitespace();
-                for a in arg {
-                    if a.starts_with( "file-name" ) { continue };
+                // for a in arg {
+                //     if a.starts_with( "file-name" ) { continue };
 
-                    name = a.to_string();
-                }
+                //     name = a.to_string();
+                // }
+
+                name = arg
+                    .into_iter()
+                    .filter( | a | !a.starts_with( "file-name" ) )
+                    .collect();
             }
         }
 
         if contentlen == 0 { return response; } // yes
+        
+        let body:String = http_request
+        .into_iter()
+        .filter( | a | a.starts_with( "body" ) )
+        .collect();
 
-        for arg in http_request {
-            if arg.starts_with( "body" ) {
+        let split_body = body.split_whitespace();
 
-                let arg = arg.split_whitespace();
+        name = format!( "imgs/{}.png",name );
 
-                let name = format!( "imgs/{}.png",name );
+        let a:String = split_body
+            .into_iter()
+            .filter( | a | !a.starts_with( "body" ) )
+            .collect();
 
-            
-                for a in arg {
-                    if a.starts_with( "body" ) { continue };
+        let a_buffer = decode( a ).unwrap();
 
-                    // println!( "{:?}", &a );
+        let mut file: File = match OpenOptions::new()
+            .write(true)
+            .append(true)
+            .open(&name) {
+                Ok( file ) => file,
+                Err( _ ) => File::create( &name ).unwrap()
+        };
 
-                    let a_buffer = decode( a ).unwrap();
-
-                    // println!( "{:?}", a_buffer );
-
-                    let mut file: File = match OpenOptions::new()
-                        .write(true)
-                        .append(true)
-                        .open(&name) {
-                            Ok( file ) => file,
-                            Err( _ ) => File::create( &name ).unwrap()
-
-                    };
-
-                    if let Err(e) = file.write_all( &a_buffer[..] ) {
-                        eprintln!("Couldn't write to file: {}", e);
-                    }
-                };
-
-                break;
-            }
+        if let Err(e) = file.write_all( &a_buffer[..] ) {
+            eprintln!("Couldn't write to file: {}", e);
         }
 
         println!( "content-length: {}", contentlen );
         println!( "file-name: {}", name );
     }
-
-    // println!("Request: {:#?}", http_request);
 
     return response;
 }
