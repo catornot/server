@@ -115,10 +115,9 @@ fn get_response_from_request(buffer: [u8; 1024 * 4]) -> Response {
 
     let res = serde_json::from_str(&json[..]);
 
-    let allowed: AllowedResponse = if res.is_ok() {
-        res.unwrap()
-    } else {
-        return not_found_reponse();
+    let allowed: AllowedResponse = match res {
+        Ok( allowed ) => allowed,
+        Err( _ ) => return not_found_reponse()
     };
 
     let mut offset = 0;
